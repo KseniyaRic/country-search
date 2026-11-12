@@ -1,23 +1,17 @@
-export interface RawLanguage {
-  name: string;
-  iso639_1?: string;
-}
-
 export interface RawCountry {
   name: string;
   population: number;
   region: string;
   capital?: string;
-  flags?: {
-    svg?: string;
-    png?: string;
+  flags: {
+    svg: string;
   };
-  languages?: RawLanguage[];
+  languages: { name: string }[];
 }
 
 export interface CountryCard {
   name: string;
-  flagUrl: string | null;
+  flagUrl: string;
   capital: string | null;
   region: string;
   population: number;
