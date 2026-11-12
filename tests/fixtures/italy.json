@@ -1,0 +1,28 @@
+[
+  {
+    "area": 301336,
+    "cioc": "ITA",
+    "flag": "🇮🇹",
+    "gini": 35.9,
+    "name": "Italy",
+    "flags": { "png": "https://flagcdn.com/w320/it.png", "svg": "https://flagcdn.com/it.svg" },
+    "latlng": [42.83333333, 12.83333333],
+    "region": "Europe",
+    "borders": ["AUT", "FRA", "SMR", "SVN", "CHE", "VAT"],
+    "capital": "Rome",
+    "demonym": "Italian",
+    "languages": [{ "name": "Italian", "iso639_1": "it", "iso639_2": "ita", "nativeName": "Italiano" }],
+    "subregion": "Southern Europe",
+    "timezones": ["UTC+01:00"],
+    "alpha2Code": "IT",
+    "alpha3Code": "ITA",
+    "currencies": [{ "code": "EUR", "name": "Euro", "symbol": "€" }],
+    "nativeName": "Italia",
+    "population": 59554023,
+    "independent": true,
+    "numericCode": "380",
+    "callingCodes": ["39"],
+    "topLevelDomain": [".it"],
+    "populationDensity": 197.63
+  }
+]
