@@ -1,9 +1,9 @@
 import { debounce } from './debounce.js';
-import { classifyError } from './classifyError.js';
+import { classifyError, type ErrorKind } from './classifyError.js';
 import { searchCountries } from './countries/searchCountries.js';
 import { mapCountryResponse } from './countries/mapCountryResponse.js';
-import { CountryCard } from './countries/types.js';
-import { ErrorKind } from './classifyError.js';
+import { mapCountryDetails } from './countries/mapCountryDetails.js';
+import type { CountryCard, CountryDetails, RawCountry } from './countries/types.js';
 
 export type SearchState =
   | { status: 'idle' }
@@ -14,35 +14,51 @@ export type SearchState =
 
 export interface SearchController {
   handleInput: (text: string) => void;
+  retry: () => void;
   getState: () => SearchState;
+  getDetails: (name: string) => CountryDetails | undefined;
 }
 
-export function createSearchController(options: { debounceMs: number }): SearchController {
+interface SearchControllerOptions {
+  debounceMs: number;
+  onStateChange?: (state: SearchState) => void;
+}
+
+export function createSearchController(options: SearchControllerOptions): SearchController {
   let state: SearchState = { status: 'idle' };
   let currentRequest: AbortController | null = null;
+  let lastQuery = '';
+  let loadedCountries: RawCountry[] = [];
+
+  const setState = (next: SearchState): void => {
+    state = next;
+    options.onStateChange?.(state);
+  };
 
   const runSearch = async (query: string): Promise<void> => {
     if (query === '') {
-      state = { status: 'idle' };
+      setState({ status: 'idle' });
       return;
     }
 
+    currentRequest?.abort();
     const requestController = new AbortController();
     currentRequest = requestController;
-    state = { status: 'loading' };
+    setState({ status: 'loading' });
 
     try {
-      const rawCountries = await searchCountries(query, requestController.signal);
-      state =
-        rawCountries.length === 0
+      loadedCountries = await searchCountries(query, requestController.signal);
+      setState(
+        loadedCountries.length === 0
           ? { status: 'empty' }
-          : { status: 'success', countries: mapCountryResponse(rawCountries) };
+          : { status: 'success', countries: mapCountryResponse(loadedCountries) },
+      );
     } catch (error) {
       const kind = classifyError(error);
       if (kind === 'aborted') {
         return;
       }
-      state = { status: 'error', kind };
+      setState({ status: 'error', kind });
     }
   };
 
@@ -54,13 +70,23 @@ export function createSearchController(options: { debounceMs: number }): SearchC
     currentRequest?.abort();
     const query = text.trim();
     if (query === '') {
-      state = { status: 'idle' };
+      setState({ status: 'idle' });
+    } else {
+      lastQuery = query;
     }
     debouncedSearch(query);
   };
 
-  return {
-    handleInput,
-    getState: () => state,
+  const retry = (): void => {
+    if (lastQuery !== '') {
+      void runSearch(lastQuery);
+    }
   };
+
+  const getDetails = (name: string): CountryDetails | undefined => {
+    const country = loadedCountries.find((item) => item.name === name);
+    return country ? mapCountryDetails(country) : undefined;
+  };
+
+  return { handleInput, retry, getState: () => state, getDetails };
 }
