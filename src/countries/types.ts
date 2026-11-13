@@ -7,6 +7,15 @@ export interface RawCountry {
     svg: string;
   };
   languages: { name: string }[];
+  area?: number;
+  borders?: string[];
+  currencies?: { name: string; symbol?: string }[];
+}
+
+export interface CountryDetails {
+  area: number | null;
+  borders: string[];
+  currencies: string[];
 }
 
 export interface CountryCard {
